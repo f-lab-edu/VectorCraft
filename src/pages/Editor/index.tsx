@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Canvas } from "@/components/Canvas/Canvas";
 import { BaseLayout } from "@/components/Layout/BaseLayout";
 import { Header } from "@/components/Layout/Header";
 import { SettingsPanel } from "@/pages/Editor/components/Settings/SettingsPanel";
@@ -10,6 +9,7 @@ import { Content } from "@/components/Layout/Content";
 import { PanelContainer } from "@/components/Layout/PanelContainer";
 import { CreateCanvasModal } from "@/pages/Editor/components/Modals/CanvasModal";
 import { ToolType } from "@/types/components/tools";
+import { EditorCanvas } from "./components/Canvas/EditorCanvas";
 
 export const EditorPage = () => {
   const [showCanvasModal, setShowCanvasModal] = useState(true);
@@ -53,7 +53,7 @@ export const EditorPage = () => {
           />
         </PanelContainer>
         <Content>
-          <Canvas {...canvasProps} />
+          <EditorCanvas {...canvasProps} />
         </Content>
         <PanelContainer position="right" width={256} className="p-4">
           <SettingsPanel

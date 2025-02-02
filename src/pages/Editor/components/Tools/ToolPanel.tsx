@@ -15,7 +15,7 @@ export const ToolPanel = ({ selectedTool, onSelectTool }: ToolPanelProps) => {
           key={tool.id}
           icon={
             <tool.icon
-              className={`w-5 h-5 ${
+              className={`w-5 h-5 p-2  rounded ${
                 selectedTool === tool.id ? "text-white" : ""
               }`}
             />

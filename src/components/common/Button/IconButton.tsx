@@ -6,7 +6,7 @@ export const IconButton = ({
   ...props
 }: IconButtonProps) => {
   return (
-    <button className={`p-2  rounded ${className}`} {...props}>
+    <button className={` ${className}`} {...props}>
       {icon}
     </button>
   );

@@ -1,6 +1,10 @@
 import { CanvasProps } from "@/types/components/canvas";
 
-export const Canvas = ({ width, height, backgroundColor }: CanvasProps) => {
+export const EditorCanvas = ({
+  width,
+  height,
+  backgroundColor,
+}: CanvasProps) => {
   if (!width || !height) {
     return null;
   }

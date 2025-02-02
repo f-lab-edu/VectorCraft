@@ -9,7 +9,7 @@ export const LayerPanel = () => {
         <span>rect - 1</span>
         <IconButton
           className="ml-auto"
-          icon={<ICONS.delete className="w-5 h-5" />}
+          icon={<ICONS.delete className="w-5 h-5 p-2 rounded" />}
           title="삭제"
         />
       </div>
