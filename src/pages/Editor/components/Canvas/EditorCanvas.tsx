@@ -1,10 +1,14 @@
+import { useShapes } from "@/contexts/ShapeContext";
 import { CanvasProps } from "@/types/components/canvas";
+import { Shape } from "@/components/Shapes/Shape";
 
 export const EditorCanvas = ({
   width,
   height,
   backgroundColor,
 }: CanvasProps) => {
+  const { shapes, selectShape } = useShapes();
+
   if (!width || !height) {
     return null;
   }
@@ -18,7 +22,15 @@ export const EditorCanvas = ({
         backgroundColor,
       }}
     >
-      {/* SVG 요소 추가 */}
+      <svg width={width} height={height}>
+        {shapes.map((shape) => (
+          <Shape
+            key={shape.id}
+            shape={shape}
+            onClick={() => selectShape(shape.id)}
+          />
+        ))}
+      </svg>
     </div>
   );
 };
