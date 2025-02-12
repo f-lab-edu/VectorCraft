@@ -4,7 +4,7 @@ import { RectangleProperties } from "./Properties/RectangleProperties";
 import { CircleProperties } from "./Properties/CircleProperties";
 import { PolygonProperties } from "./Properties/PolygonProperties";
 import { ColorInput } from "@/components/common/Input/ColorInput";
-import { useEditorStore } from "@/store/useEditorStore";
+import { useToolStore } from "@/store/useToolStore";
 import { ToolType } from "@/types/components/tools";
 import { ComponentType, useMemo } from "react";
 import { CursorProperties } from "./Properties/CursorProperties";
@@ -20,7 +20,7 @@ export const SettingsPanel = ({
   backgroundColor,
   onChangeBackgroundColor,
 }: SettingsPanelProps) => {
-  const selectedTool = useEditorStore((state) => state.selectedTool);
+  const selectedTool = useToolStore((state) => state.selectedTool);
 
   const toolSettingsComponent = useMemo(() => {
     const Component = ToolComponents[selectedTool];

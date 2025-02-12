@@ -1,4 +1,5 @@
-import { useEditorStore } from "@/store/useEditorStore";
+import { useShapeStore } from "@/store/useShapeStore";
+import { useToolStore } from "@/store/useToolStore";
 import { calculateShapeDimensions } from "@/utils/shapeCalculator";
 import {
   Shape,
@@ -12,7 +13,8 @@ interface PreviewProps {
 }
 
 export const Preview = ({ renderShape }: PreviewProps) => {
-  const { mouse, selectedTool, toolSettings } = useEditorStore();
+  const { mouse } = useShapeStore();
+  const { selectedTool, toolSettings } = useToolStore();
   const { isDrawing, startPoint, endPoint } = mouse;
 
   if (!isDrawing || !startPoint || !endPoint || selectedTool === "cursor") {

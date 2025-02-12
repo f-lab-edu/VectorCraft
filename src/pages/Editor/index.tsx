@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
+import { useParams } from "react-router-dom";
 import { BaseLayout } from "@/components/Layout/BaseLayout";
 import { SettingsPanel } from "@/pages/Editor/components/Settings/SettingsPanel";
 import { ToolPanel } from "@/pages/Editor/components/Tools/ToolPanel";
@@ -9,34 +10,28 @@ import { PanelContainer } from "@/components/Layout/PanelContainer";
 import { CreateCanvasModal } from "@/pages/Editor/components/Modals/CanvasModal";
 import { EditorCanvas } from "./components/Canvas/EditorCanvas";
 import { Header } from "./components/Layout/Header";
+import { useCanvas } from "@/hooks/useCanvas";
+import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
+import { useCanvasStore } from "@/store/useCanvasStore";
 
 export const EditorPage = () => {
-  const [showCanvasModal, setShowCanvasModal] = useState(true);
-  const [canvasProps, setCanvasProps] = useState<{
-    width?: number;
-    height?: number;
-    backgroundColor?: string;
-  }>();
+  const { canvasId } = useParams();
   const canvasRef = useRef<HTMLDivElement>(null);
+  useRealtimeChannel(canvasId);
 
-  const handleCreateCanvas = (
-    width: number,
-    height: number,
-    backgroundColor: string
-  ) => {
-    setCanvasProps({ width, height, backgroundColor });
-    setShowCanvasModal(false);
-  };
+  const { width, height, backgroundColor } = useCanvasStore();
+  const {
+    isLoading,
+    showCanvasModal,
+    setShowCanvasModal,
+    handleCreateCanvas,
+    handleChangeBackgroundColor,
+    handleResetCanvas,
+  } = useCanvas(canvasId);
 
-  const handleChangeBackgroundColor = (color: string) => {
-    setCanvasProps((prev) =>
-      prev ? { ...prev, backgroundColor: color } : prev
-    );
-  };
-
-  const handleResetCanvas = () => {
-    setShowCanvasModal(true);
-  };
+  if (isLoading && canvasId) {
+    return <div>로딩중...</div>;
+  }
 
   return (
     <BaseLayout>
@@ -46,11 +41,16 @@ export const EditorPage = () => {
           <ToolPanel />
         </PanelContainer>
         <Content>
-          <EditorCanvas {...canvasProps} ref={canvasRef} />
+          <EditorCanvas
+            width={width}
+            height={height}
+            backgroundColor={backgroundColor}
+            ref={canvasRef}
+          />
         </Content>
         <PanelContainer position="right" width={256} className="p-4">
           <SettingsPanel
-            backgroundColor={canvasProps?.backgroundColor || "#FFFFFF"}
+            backgroundColor={backgroundColor}
             onChangeBackgroundColor={handleChangeBackgroundColor}
           />
         </PanelContainer>

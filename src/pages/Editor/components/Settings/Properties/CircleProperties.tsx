@@ -1,9 +1,10 @@
 import { ColorInput } from "@/components/common/Input/ColorInput";
 import { NumberInput } from "@/components/common/Input/NumberInput";
-import { useEditorStore } from "@/store/useEditorStore";
+
+import { useToolStore } from "@/store/useToolStore";
 
 export const CircleProperties = () => {
-  const { toolSettings, updateToolSettings } = useEditorStore();
+  const { toolSettings, updateToolSettings } = useToolStore();
   const settings = toolSettings.circle;
   return (
     <div className="space-y-4">

@@ -1,13 +1,14 @@
 import { IconButton } from "@/components/common/Button/IconButton";
 import { TOOLS } from "@/constants/icons";
+
+import { useToolStore } from "@/store/useToolStore";
 import { ToolType } from "@/types/components/tools";
-import { useEditorStore } from "@/store/useEditorStore";
 
 export const ToolPanel = () => {
-  const { selectedTool, setSelectedTool } = useEditorStore();
+  const { selectedTool, setSelectedTool } = useToolStore();
 
   return (
-    <div className="flex flex-col gap-2 p-1">
+    <div className="flex flex-col gap-2">
       {TOOLS.map((tool) => (
         <IconButton
           key={tool.id}

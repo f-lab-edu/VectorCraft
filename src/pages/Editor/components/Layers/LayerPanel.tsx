@@ -1,10 +1,26 @@
 import { IconButton } from "@/components/common/Button/IconButton";
 import { ICONS } from "@/constants/icons";
-import { useEditorStore } from "@/store/useEditorStore";
+
+import { useShapeStore } from "@/store/useShapeStore";
+import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
+import { useParams } from "react-router-dom";
+import { shapeService } from "@/services/shapeService";
 
 export const LayerPanel = () => {
-  const { shapes, deleteShape, selectShape, selectedShapeId } =
-    useEditorStore();
+  const { shapes, deleteShape, selectShape, selectedShapeId } = useShapeStore();
+  const { canvasId } = useParams();
+  const { broadcastShapeDelete } = useRealtimeChannel(canvasId);
+
+  const handleDelete = (id: string) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      shapeService.deleteShape(id);
+      deleteShape(id);
+      broadcastShapeDelete(id);
+    } catch (error) {
+      console.error("도형 삭제 실패:", error);
+    }
+  };
 
   return (
     <>
@@ -26,10 +42,7 @@ export const LayerPanel = () => {
               className="ml-auto hover:bg-gray-100 rounded"
               icon={<ICONS.delete className="w-5 h-5 p-1" />}
               title="삭제"
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteShape(shape.id);
-              }}
+              onClick={handleDelete(shape.id)}
             />
           </div>
         ))}

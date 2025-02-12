@@ -1,12 +1,13 @@
 import { Button } from "@/components/common/Button/Button";
-import { useEditorStore } from "@/store/useEditorStore";
+
+import { useShapeStore } from "@/store/useShapeStore";
 import { HeaderProps } from "@/types/components/header";
 import { exportToPng } from "@/utils/exportCanvas";
 import { exportSettings, importSettings } from "@/utils/jsonManager";
 import { useRef } from "react";
 
 export const Header = ({ onReset, canvasRef }: HeaderProps) => {
-  const { shapes } = useEditorStore();
+  const { shapes } = useShapeStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleExportSettings = () => {
@@ -20,7 +21,7 @@ export const Header = ({ onReset, canvasRef }: HeaderProps) => {
     if (!file) return;
 
     const importedShapes = await importSettings(file);
-    useEditorStore.setState({ shapes: importedShapes });
+    useShapeStore.setState({ shapes: importedShapes });
   };
 
   const handleImportClick = () => {

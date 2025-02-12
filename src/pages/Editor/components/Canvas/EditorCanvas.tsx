@@ -1,7 +1,11 @@
 import { forwardRef, useCallback } from "react";
 import { CanvasProps } from "@/types/components/canvas";
-import { useEditorStore } from "@/store/useEditorStore";
+import { useShapeStore } from "@/store/useShapeStore";
+import { useToolStore } from "@/store/useToolStore";
 import { Point } from "@/types/mouse";
+import { useParams } from "react-router-dom";
+import { useRealtimeChannel } from "@/hooks/useRealtimeChannel";
+import { nanoid } from "nanoid";
 
 import {
   CircleShape,
@@ -14,17 +18,16 @@ import { calculateShapeDimensions } from "@/utils/shapeCalculator";
 import { Preview } from "./Preview";
 import { Selection } from "./Selection";
 import { isPointInShape, shapeComponentsMapper } from "@/utils/shapeHelpers";
+import { shapeService } from "@/services/shapeService";
 
 export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
   ({ width, height, backgroundColor }, ref) => {
     const {
       shapes,
-      selectedTool,
       selectedShapeId,
       mouse,
       drag,
       resize,
-      toolSettings,
       startDrawing,
       updateDrawing,
       endDrawing,
@@ -36,7 +39,12 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
       startResize,
       updateResize,
       endResize,
-    } = useEditorStore();
+    } = useShapeStore();
+
+    const { selectedTool, toolSettings } = useToolStore();
+    const { canvasId } = useParams();
+    const { broadcastShapeAdd, broadcastShapeUpdate } =
+      useRealtimeChannel(canvasId);
 
     const getCanvasPoint = useCallback((e: React.MouseEvent): Point => {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -48,21 +56,16 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
 
     const handleMouseDown = useCallback(
       (e: React.MouseEvent) => {
-        //1. 마우스 클릭 좌표 확인
         const point = getCanvasPoint(e);
+
         if (selectedTool === "cursor") {
-          //2. 도형 확인
           for (let i = shapes.length - 1; i >= 0; i--) {
             if (isPointInShape(point, shapes[i])) {
-              //3-1. 도형 찾을 경우
               selectShape(shapes[i].id);
-              // 드래그 시작
               startDragging(point, { x: shapes[i].x, y: shapes[i].y });
               return;
             }
           }
-          //3-2. 도형 못 찾을 경우
-          selectShape(null);
           return;
         }
 
@@ -110,11 +113,36 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
     );
 
     const handleMouseUp = useCallback(() => {
+      if (!canvasId) return;
+
       if (resize.isResizing) {
+        const selectedShape = shapes.find(
+          (shape) => shape.id === selectedShapeId
+        );
+        if (selectedShape) {
+          try {
+            shapeService.updateShape(selectedShape.id, selectedShape);
+            broadcastShapeUpdate(selectedShape);
+          } catch (error) {
+            console.error("도형 업데이트 실패:", error);
+          }
+        }
         endResize();
         return;
       }
+
       if (drag.isDragging) {
+        const selectedShape = shapes.find(
+          (shape) => shape.id === selectedShapeId
+        );
+        if (selectedShape) {
+          try {
+            shapeService.updateShape(selectedShape.id, selectedShape);
+            broadcastShapeUpdate(selectedShape);
+          } catch (error) {
+            console.error("도형 업데이트 실패:", error);
+          }
+        }
         endDragging();
         return;
       }
@@ -136,39 +164,56 @@ export const EditorCanvas = forwardRef<HTMLDivElement, CanvasProps>(
       });
 
       const baseToolSettings = toolSettings[selectedTool];
+      const shapeId = nanoid();
 
       const newShape =
         {
           rectangle: {
             ...baseToolSettings,
+            id: shapeId,
             type: "rectangle" as const,
             borderRadius: 0,
             ...dimensions,
           } as RectangleShape,
           circle: {
             ...baseToolSettings,
+            id: shapeId,
             type: "circle" as const,
             ...dimensions,
           } as CircleShape,
           polygon: {
             ...baseToolSettings,
+            id: shapeId,
             type: "polygon" as const,
             ...dimensions,
           } as PolygonShape,
         }[selectedTool] ?? null;
 
-      if (newShape) addShape(newShape);
+      if (newShape) {
+        try {
+          shapeService.createShape(canvasId, newShape);
+          addShape(newShape);
+          broadcastShapeAdd(newShape);
+        } catch (error) {
+          console.error("Failed to create shape:", error);
+        }
+      }
       endDrawing();
     }, [
+      canvasId,
       resize.isResizing,
       drag.isDragging,
-      endResize,
-      endDragging,
       mouse,
       selectedTool,
       toolSettings,
+      shapes,
+      selectedShapeId,
       addShape,
       endDrawing,
+      endResize,
+      endDragging,
+      broadcastShapeAdd,
+      broadcastShapeUpdate,
     ]);
 
     const handleStartResize = useCallback(
